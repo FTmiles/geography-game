@@ -1,7 +1,7 @@
 import { from, switchMap, take } from "rxjs"
 
 const apiUrl = 'https://restcountries.com/v3.1'
-const urlAllCountries = '/independent?status=true&fields=name'
+const urlAllData = 'https://restcountries.com/v3.1/independent?status=true&fields=name,translations,flags,population,capital,subregion'
 const urlFindByCountry = '/name/' //e.g. /name/germany
 
 function getData(url:string){
@@ -18,7 +18,7 @@ return from(fetch(url))
 }
 
 export const apiGetAllCountries = () => {
-    return getData(apiUrl + urlAllCountries)
+    return getData(urlAllData)
 }
 
 export const apiGetCountryDetails = (country:string) => {

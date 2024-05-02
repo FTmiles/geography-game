@@ -5,22 +5,8 @@ import { pick6RandomCountries } from "./businessLogic";
 import { render } from "./businessLogic";
 import { renderGameInterface } from "./gameInterface"
 import './output.css';
-import Header from "./Header";
-/*
-get all countries by name
-https://restcountries.com/v3.1/all?fields=name
-https://restcountries.com/v3.1/independent?status=true&fields=name
 
 
-then randomly choose 1 
-https://restcountries.com/v3.1/name/chad
-
-I need
-country name
-flag
-capital
-region > subregion
-*/
 
 const countries = ['germany', 'spain', 'kenya', 'japan', 'canada', 'australia'];
 
@@ -32,16 +18,28 @@ const subscription = apiGetCountryDetails("latvia").subscribe({
     complete: () => {subscription.unsubscribe();console.log("unsubbing");}
 })
 
+
+
 let allCountries:string[];
 let selected6countries:string[];
 
 const countriesSub:any = apiGetAllCountries()
 .pipe(
-    map(countryArr => countryArr.map((country:any) =>  country.name.common)),
-    tap((countries: string[]) => setSelected6countries(pick6RandomCountries(countries)))
+    map(countryArr => countryArr.map((country:any) => ({
+        country: country.name.common,
+        flag: country.flags.svg || country.flags.png,
+        capital: country.capital.join(", "),
+        subregion: country.subregion,
+        chinese: country.translations.zho?.common || country.name.nativeName.zho.common,
+        population: country.population,
+    })))
+
 )
 .subscribe({
-    next: data => allCountries = data,
+    next: data => {
+        allCountries = data,
+        setSelected6countries(pick6RandomCountries(data.map((x:any)=>x.name)))
+    },
     error: error => console.error('Error fetching data: ', error),
     complete: () => countriesSub.unsubscribe()
 })
