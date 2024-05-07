@@ -34,7 +34,29 @@ export function render(countries: string[]){
 
 };
 
-function game () {
-    
+/**
+ *Returns random number from zero to max
+ *
+ * Including 0, including max
+ * */ 
+export function getRandom1 (max: number) {
+    return Math.floor(Math.random() * (max + 1))
 }
 
+/**
+ * Returns [ 0 <= random num <= max ]
+ * 
+ * excludes the "exclude" param
+ * 
+ * array el  count = howMany
+ */
+export function getRandomMany (max: number, howMany: number, exclude: number)  {
+    let arr = [...Array(howMany)]
+    arr = arr.map(()=>{
+        let num;
+        do num = getRandom1(max);
+        while (num !== exclude)
+        return num;
+    })
+    return arr;
+}

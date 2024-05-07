@@ -1,4 +1,6 @@
 
+
+
 const root = document.getElementById('root');
 
 export function renderGameInterface() {

@@ -1,14 +1,28 @@
 
 import { apiGetAllCountries, apiGetCountryDetails } from "./api-service";
 import { map, tap } from "rxjs";
-import { pick6RandomCountries } from "./businessLogic";
+import { getRandom1, pick6RandomCountries } from "./businessLogic";
 import { render } from "./businessLogic";
 import { renderGameInterface } from "./gameInterface"
 import './output.css';
-
-
+import { SingleCountryData, FullData } from "./interface";
+import { BehaviorSubject } from "rxjs";
 
 const countries = ['germany', 'spain', 'kenya', 'japan', 'canada', 'australia'];
+let fullData:FullData = {  allCountries: [], allFlagsEl: [], allCapitals: [], allSubregions: [], allPopulations: [], allChinese: []  }
+
+// let allCountries: string[];
+// let allFlagsEl: HTMLElement[];
+// let allCapitals: string[];
+// let allSubregions: string[];
+// let allPopulations: number[];
+// let allChinese: string[];
+
+let topicCountryInd: number;
+let startTopicSubjec = new BehaviorSubject(null);
+
+let selected6countries:string[];
+
 
 const subscription = apiGetCountryDetails("latvia").subscribe({ 
     next: data=> {
@@ -19,30 +33,30 @@ const subscription = apiGetCountryDetails("latvia").subscribe({
 })
 
 
-
-let allCountries:string[];
-let selected6countries:string[];
-
 const countriesSub:any = apiGetAllCountries()
-.pipe(
-    map(countryArr => countryArr.map((country:any) => ({
-        country: country.name.common,
-        flag: country.flags.svg || country.flags.png,
-        capital: country.capital.join(", "),
-        subregion: country.subregion,
-        chinese: country.translations.zho?.common || country.name.nativeName.zho.common,
-        population: country.population,
-    })))
-
-)
 .subscribe({
     next: data => {
-        allCountries = data,
-        setSelected6countries(pick6RandomCountries(data.map((x:any)=>x.name)))
+        fullData.allCountries = data.map((x:SingleCountryData) => x.country),
+        fullData.allChinese = data.map((x:SingleCountryData) => x.chinese),
+        fullData.allCapitals = data.map((x:SingleCountryData) => x.capital),
+        fullData.allFlagsEl = data.map((x:SingleCountryData) => {
+            let el = document.createElement('img');
+            el.src = x.flag;
+            return el;
+        }),
+        fullData.allPopulations = data.map((x:SingleCountryData) => x.population),
+        fullData.allSubregions = data.map((x:SingleCountryData) => x.subregion),
+
+        topicCountryInd = getRandom1(fullData.allCountries.length);
+
+        setSelected6countries(pick6RandomCountries(fullData.allCountries))
     },
     error: error => console.error('Error fetching data: ', error),
     complete: () => countriesSub.unsubscribe()
 })
+
+getRandom1(2)
+
 
 export function setSelected6countries(new6:string[]){
     selected6countries = new6;

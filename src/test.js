@@ -1,5 +1,8 @@
-let bb = ["ass", "crack", "titties"].map(x=> {
-    return {age:x}
-})
+let arr = [...Array(6)]
 
-console.log(bb);
+arr = arr.map(()=>'bitch')
+
+
+
+
+console.log(arr);
