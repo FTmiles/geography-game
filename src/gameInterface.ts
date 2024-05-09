@@ -1,4 +1,4 @@
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, fromEvent } from "rxjs";
 
 
 
@@ -46,14 +46,38 @@ export function taskSection(hintPara:string, options: string[] | HTMLElement[] |
     hint.innerText = hintPara;
     
     const optionsDiv: HTMLElement = document.createElement("div");
-    
+    const delOptions: HTMLElement[] = [];
+
     const option = (optionContent:string | HTMLElement | number) => {
         const wrapper: HTMLElement = document.createElement("div");
-        wrapper.className = "w-1/3 h-40 bg-red-500 inline-block p-3"
+        delOptions.push(wrapper)
+        wrapper.className = "w-1/3 h-40 bg-gray-200 inline-block p-3 align-top anime"
         const optionDiv: HTMLElement = document.createElement("div");
+
+
+
         if (typeof optionContent === "string" || typeof optionContent === "number") optionDiv.innerText = optionContent.toString();
-            else optionDiv.append(optionContent)
-        optionDiv.className = "w-full h-full bg-blue-400 flex justify-center items-center"
+            else {
+                optionContent.classList.add("max-w-full", "max-h-full"); // Add max width and height to image
+                optionContent.style.objectFit = "contain"; // Ensure the image fits inside its container
+    
+                // optionContent.className="max-h-full hover:object-scale-down"
+                optionDiv.append(optionContent)
+            }
+        optionDiv.className = " bg-blue-400 flex justify-center items-center w-full h-full box-border border-transparent border-8 border-solid";
+        const optionObs = fromEvent(optionDiv, "click")
+        optionObs.subscribe(e=>{
+            // console.log("currentTarget - > ",e.currentTarget);
+            const targetElement = e.currentTarget as HTMLElement;
+            targetElement.classList.add("wrong-option")
+
+            hint.classList.add("inline-block")
+            delOptions.splice(3,1);
+            console.log("ALL 6  ", delOptions)
+            delOptions.forEach(x=> x.remove())
+                       
+
+        })
         wrapper.append(optionDiv);
         return wrapper;
     }

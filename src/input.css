@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+    .wrong-option {
+      border: 8px solid rgba(255, 0, 0, 0.5); /* Red border with 50% transparency */
+      /* box-sizing: border-box; Ensure border is inside the box */
+
+    }
+
+    .anime {
+        transition: all 2s ease-in;
+    }
+  }
