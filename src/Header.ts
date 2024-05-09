@@ -1,3 +1,8 @@
+import { fromEvent } from "rxjs";
+import { nextQuestion } from ".";
+
+
+
 export default function Header(){
 
     const headerDom : HTMLElement | null = document.querySelector('header');
@@ -8,7 +13,17 @@ export default function Header(){
     const h1 = document.createElement('h1');
     h1.className = "text-lg text-center";
     h1.innerText = "Geography Game - Country Quiz";
-    headerDom.append(h1);
+
+    const resetButton: HTMLElement = document.createElement('button');
+    resetButton.innerText = "reset question"
+    resetButton.className = "rounded-md border-b-purple-300 border-2 "
+    const buttonObs = fromEvent(resetButton, 'click');
+    buttonObs.subscribe(event => nextQuestion())
+
+    headerDom.append(
+        h1,
+        resetButton
+    );
 
 
     console.log("THIS IS INSIDE HEADER FUNCTION COMPONENT");

@@ -1,36 +1,80 @@
 
 import { apiGetAllCountries, apiGetCountryDetails } from "./api-service";
-import { map, tap } from "rxjs";
-import { getRandom1, pick6RandomCountries } from "./businessLogic";
+import {  fromEvent, map, tap } from "rxjs";
+import { getRandom1, getRandomMany, pick6RandomCountries, shuffleArray } from "./businessLogic";
 import { render } from "./businessLogic";
-import { renderGameInterface } from "./gameInterface"
+import { renderGameInterface, taskSection } from "./gameInterface"
 import './output.css';
 import { SingleCountryData, FullData } from "./interface";
 import { BehaviorSubject } from "rxjs";
+import Footer from "./Footer";
+import Header from "./Header";
+import { topicSection } from "./gameInterface";
+import { taskHintsDescriptive } from "./businessLogic";
+
+
 
 const countries = ['germany', 'spain', 'kenya', 'japan', 'canada', 'australia'];
-let fullData:FullData = {  allCountries: [], allFlagsEl: [], allCapitals: [], allSubregions: [], allPopulations: [], allChinese: []  }
-
-// let allCountries: string[];
-// let allFlagsEl: HTMLElement[];
-// let allCapitals: string[];
-// let allSubregions: string[];
-// let allPopulations: number[];
-// let allChinese: string[];
-
-let topicCountryInd: number;
-let startTopicSubjec = new BehaviorSubject(null);
-
-let selected6countries:string[];
+export let fullData:FullData = {  allCountries: [], allFlagsEl: [], allCapitals: [], allSubregions: [], allPopulations: [], allChinese: []  }
 
 
-const subscription = apiGetCountryDetails("latvia").subscribe({ 
-    next: data=> {
-        return console.log(data);
-    },
-    error: error => console.error('Error fetching data:', error),
-    complete: () => {subscription.unsubscribe();console.log("unsubbing");}
+let questionHint =  new BehaviorSubject<string>('Given country: ');
+let questionKey = new BehaviorSubject<string>("estone");
+
+
+export const questionCountryIndSubj = new BehaviorSubject<number>(0);
+type FullDataKey = keyof FullData;
+export let taskNames: FullDataKey[];
+let taskNameKey:FullDataKey = 'allCountries';
+let tasksDOM: HTMLElement[] = [];
+
+const logState$ = fromEvent(document.querySelector('footer')  || document.body, 'click');
+logState$.subscribe(event=>{
+    console.log("touched your body")
+    questionKey.next("MicroState")
 })
+
+export function nextQuestion () {
+    questionCountryIndSubj.next(getRandom1(fullData.allCountries.length - 1))
+    tasksDOM.forEach(task=> task.remove())
+    addTask();
+}
+
+//NEXT QUESTION IMPLEMENTATION
+questionCountryIndSubj.subscribe(questionCountryInd => {
+    //new value issued equals to game restart / change country
+    if (questionCountryInd == null) {
+        console.log("questionCountryInd === null, so I'm quitting early guard clause");
+        return;
+    }
+    
+    //set / reset game questions
+    taskNames = shuffleArray(Object.keys(fullData) as FullDataKey[] );
+    // taskNames = Object.keys(fullData) as FullDataKey[];
+    taskNames = taskNames.filter(task => task != taskNameKey)
+    console.log("taskNames: ", taskNames)
+    questionHint.next("Here's a country >> ")
+    questionKey.next( fullData.allCountries[questionCountryInd]  )
+
+})
+
+function addTask(){
+    let random5: number[] = getRandomMany(fullData.allCountries.length - 1, 5, questionCountryIndSubj.getValue());
+    random5.push(questionCountryIndSubj.getValue())
+    random5 = shuffleArray(random5);
+    console.log("RANDOM 5: ", random5);
+    
+    const taskName: FullDataKey | undefined = taskNames.shift();
+    if (typeof taskName === "undefined") return;
+
+    const options = random5.map((n:number) => fullData[taskName][n]) as (string[] | number[] | HTMLElement[]); //without as..., gives  (string | number | HTMLElement)[]
+    const newTask = taskSection(taskHintsDescriptive[taskName], options);
+    root?.append(
+        newTask
+    );
+    tasksDOM.push(newTask)
+}
+
 
 
 const countriesSub:any = apiGetAllCountries()
@@ -47,22 +91,34 @@ const countriesSub:any = apiGetAllCountries()
         fullData.allPopulations = data.map((x:SingleCountryData) => x.population),
         fullData.allSubregions = data.map((x:SingleCountryData) => x.subregion),
 
-        topicCountryInd = getRandom1(fullData.allCountries.length);
+        nextQuestion ();
+        // questionCountryIndSubj.next( getRandom1(data.length - 1)  )
 
-        setSelected6countries(pick6RandomCountries(fullData.allCountries))
     },
     error: error => console.error('Error fetching data: ', error),
     complete: () => countriesSub.unsubscribe()
 })
 
-getRandom1(2)
+
+const root = document.getElementById('root');
 
 
-export function setSelected6countries(new6:string[]){
-    selected6countries = new6;
+export function renderPage(){
+    const body = document.querySelector('body');
+    if (body!==null) body.className = "flex flex-col min-h-screen"
+    Header();
+    Footer();
     
-    renderGameInterface()
-    render(new6);
+    if (root === null) return;
+
+    root.className = "grow  bg-gray-500 mx-auto w-full" //max-w-screen-md
+
+    root.append(
+        topicSection(questionHint, questionKey)
+        // questionSection()
+    )
 }
 
 
+
+renderPage();

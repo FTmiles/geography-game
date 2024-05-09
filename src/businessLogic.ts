@@ -1,7 +1,9 @@
-import Footer from "./Footer";
-import Header from "./Header";
+
+import { questionCountryIndSubj, fullData } from ".";
+import { BehaviorSubject } from "rxjs";
 
 const root = document.getElementById('root');
+
 
 
 export function pick6RandomCountries(countries: string[]){
@@ -17,20 +19,9 @@ export function pick6RandomCountries(countries: string[]){
 }
 
 export function render(countries: string[]){
-    const body = document.querySelector('body');
-    if (body!==null) body.className = "flex flex-col min-h-screen"
-    Header();
-    Footer();
+
     
-    const ul = document.createElement("ul");
 
-    countries.forEach(country => {
-        const li: HTMLElement = document.createElement("li");
-        li.innerText = country;
-        ul.appendChild(li);
-    });
-
-    root?.append(ul)
 
 };
 
@@ -52,11 +43,31 @@ export function getRandom1 (max: number) {
  */
 export function getRandomMany (max: number, howMany: number, exclude: number)  {
     let arr = [...Array(howMany)]
+
     arr = arr.map(()=>{
         let num;
         do num = getRandom1(max);
-        while (num !== exclude)
+        while (num == exclude)
         return num;
     })
+
     return arr;
 }
+
+export function shuffleArray<T>(array: T[]): T[] {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+  
+
+  export const taskHintsDescriptive:  { [key: string]: string } = {
+    allCountries: "Name the country",
+    allFlagsEl: "Pick the flag",
+    allCapitals: "What is the capital city?",
+    allSubregions: "Where is the country located?",
+    allPopulations: "Guess the population",
+    allChinese: "In Chinese"
+  }
