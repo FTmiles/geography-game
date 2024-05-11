@@ -9,7 +9,7 @@ export default function Header(){
     if (headerDom  === null) return;
     console.log("header dog", headerDom);
     
-    headerDom.className = "bg-sky-300 font-semibold p-4";
+    headerDom.className = "bg-primary30-500 font-semibold p-4";
     const h1 = document.createElement('h1');
     h1.className = "text-lg text-center";
     h1.innerText = "Geography Game - Country Quiz";

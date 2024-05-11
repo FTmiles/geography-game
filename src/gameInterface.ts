@@ -42,7 +42,7 @@ export function topicSection(questionHint: BehaviorSubject<string>, questionKey:
 export function taskSection(hintPara:string, options: string[] | HTMLElement[] | number[])  {
     const questionSection = document.createElement("section");
     const hint: HTMLElement = document.createElement("div");
-    hint.className = "w-200 bg-yellow-200";
+    hint.className = "w-200 bg-primary-600";
     hint.innerText = hintPara;
     
     const optionsDiv: HTMLElement = document.createElement("div");

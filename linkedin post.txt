@@ -1,0 +1,8 @@
+While on my Angular journey, accepted a RxJS sidequest - let's create a project and use RxJS's observables everywhere. Little did I know that View Transitions API was waiting in this rabbit hole...
+
+Have you used the View Transitions API yet?
+Here's my new Geography Game powered by Webpack, RxJS, Tailwind CSS, and ofc View Transitions API. No big front-end framework like React or Angular was used.
+
+Shout out to restcountries.com for providing the world data!
+
+Open in the latest Chrome, Edge or Opera browsers
