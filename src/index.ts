@@ -11,11 +11,12 @@ import Footer from "./Footer";
 import Header from "./Header";
 import { topicSection } from "./gameInterface";
 import { taskHintsDescriptive } from "./businessLogic";
+import { Task } from "./Task";
 
 
 
 const countries = ['germany', 'spain', 'kenya', 'japan', 'canada', 'australia'];
-export let fullData:FullData = {  allCountries: [], allFlagsEl: [], allCapitals: [], allSubregions: [], allPopulations: [], allChinese: []  }
+export let fullData:FullData = {  allCountries: [], allFlags: [], allCapitals: [], allSubregions: [], allPopulations: [], allChinese: []  }
 
 
 let questionHint =  new BehaviorSubject<string>('Given country: ');
@@ -67,12 +68,13 @@ function addTask(){
     const taskName: FullDataKey | undefined = taskNames.shift();
     if (typeof taskName === "undefined") return;
 
-    const options = random5.map((n:number) => fullData[taskName][n]) as (string[] | number[] | HTMLElement[]); //without as..., gives  (string | number | HTMLElement)[]
-    const newTask = taskSection(taskHintsDescriptive[taskName], options);
+    const options: string[] = random5.map((n:number) => fullData[taskName][n]) //as (string[] | number[] | HTMLElement[]); //without as..., gives  (string | number | HTMLElement)[]
+    // const newTask = taskSection(taskHintsDescriptive[taskName], options);
+    const newTask: Task = new Task(options, "gimme the shitty!", taskName === 'allFlags', random5.findIndex(x=> x === questionCountryIndSubj.getValue()))
     root?.append(
-        newTask
+        newTask.setup()
     );
-    tasksDOM.push(newTask)
+    // tasksDOM.push(newTask)
 }
 
 
@@ -83,12 +85,8 @@ const countriesSub:any = apiGetAllCountries()
         fullData.allCountries = data.map((x:SingleCountryData) => x.country),
         fullData.allChinese = data.map((x:SingleCountryData) => x.chinese),
         fullData.allCapitals = data.map((x:SingleCountryData) => x.capital),
-        fullData.allFlagsEl = data.map((x:SingleCountryData) => {
-            let el = document.createElement('img');
-            el.src = x.flag;
-            return el;
-        }),
-        fullData.allPopulations = data.map((x:SingleCountryData) => x.population),
+        fullData.allFlags = data.map((x:SingleCountryData) =>  x.flag),
+        fullData.allPopulations = data.map((x:SingleCountryData) => x.population.toString()),
         fullData.allSubregions = data.map((x:SingleCountryData) => x.subregion),
 
         nextQuestion ();

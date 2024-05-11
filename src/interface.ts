@@ -9,9 +9,9 @@ export interface SingleCountryData {
 
 export interface FullData {
     allCountries: string[];
-    allFlagsEl: HTMLElement[];
+    allFlags: string[];
     allCapitals: string[];
     allSubregions: string[];
-    allPopulations: number[];
+    allPopulations: string[];
     allChinese: string[];
 }
