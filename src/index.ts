@@ -71,8 +71,10 @@ function addTask(){
     const options: string[] = random5.map((n:number) => fullData[taskName][n]) //as (string[] | number[] | HTMLElement[]); //without as..., gives  (string | number | HTMLElement)[]
     // const newTask = taskSection(taskHintsDescriptive[taskName], options);
     const newTask: Task = new Task(options, "gimme the shitty!", taskName === 'allFlags', random5.findIndex(x=> x === questionCountryIndSubj.getValue()))
+    const stuff = newTask.setup();
+    console.log("fractionalization", stuff)
     root?.append(
-        newTask.setup()
+        stuff
     );
     // tasksDOM.push(newTask)
 }

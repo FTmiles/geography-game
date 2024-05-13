@@ -7,6 +7,7 @@ export class Task {
     taskDescr: string;
     correctIndex: number;
     correctAnswerEl: HTMLElement;  //span or img (when flag)
+    taskQAnswered: HTMLElement = document.createElement('div');
 
     constructor (options: string[] , taskDescr: string, isImg: boolean, correctIndex: number) {
         this.options = this.wrapOptionsInDomEl(options, isImg);
@@ -40,37 +41,31 @@ export class Task {
 
         wrapper.append(taskDescr);
 
-        const optionWrapper = document.createElement('div');
-        optionWrapper.className = "flex flex-row flex-wrap gap-3"
+        const optionContainer = document.createElement('div');
+        optionContainer.className = "flex flex-row flex-wrap gap-3"
 
-        this.options.map(option => {
-            if  (option instanceof HTMLElement)
-                return option;
-            else  {
-                const span = document.createElement("span");
-                span.innerText = option;
-                return span;
-            } 
-        })
 
         this.options.forEach((option:HTMLElement, i:number) => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = "aspect-[1.8] w-[300px] bg-red-200 flex justify-center items-center";
+            optionDiv.append(option)
             //@ts-ignore
-            option.style.viewTransitionName = "option" + i;
+            optionDiv.style.viewTransitionName = "option" + i;
 
-            const optionClickObs = fromEvent(option, 'click');
+            const optionClickObs = fromEvent(optionDiv, 'click');
             optionClickObs.subscribe((e:Event) => this.handleOptionClick(e.currentTarget as HTMLElement, i))
-            
+            optionContainer.append(optionDiv)
         })
 
-        this.taskEl.append(wrapper, optionWrapper)
+        this.taskEl.append(wrapper, optionContainer)
         return this.taskEl;
     }
 
 
     handleOptionClick(clickedDiv: HTMLElement, i:number){
-        //correct answer
+        //CORRECT ANSWER
         if (i === this.correctIndex) {
-            clickedDiv.classList.add("")
+            // clickedDiv.classList.add("")
             //@ts-ignore
             clickedDiv.style.viewTransitionName = "animateMe"
             //@ts-ignore
@@ -79,37 +74,40 @@ export class Task {
             if ("startViewTransition" in document){
                 //@ts-ignore
                 const transition = document.startViewTransition(  () => this.handleClickedCorrect(clickedDiv)  )
-                this.cleanAfterViewTransition(transition, clickedDiv);
+                this.cleanAfterViewTransition(transition);
             }
             else 
             this.handleClickedCorrect(clickedDiv)
-        } else {
+        } else { //INCORRECT ANSWER
             clickedDiv.classList.add("opacity-50");
         }
     }
 
     handleClickedCorrect(correctDiv: HTMLElement) {
         console.log("clicked correct answer")
-        this.options.forEach(option => option.remove())
+        this.options.forEach(option => {
+            const parent: HTMLElement | null = option.parentElement;
+            if (parent) parent.remove()
+            })
 
-        const taskQAnswered: HTMLElement = document.createElement('div');
-        taskQAnswered.className = "p-3 bg-red-400 inline-block";
+        this.taskQAnswered.className = "p-3 bg-red-400 inline-block";
         //@ts-ignore
-        taskQAnswered.style.viewTransitionName = "animateMe"
+        this.taskQAnswered.style.viewTransitionName = "animateMe"
         //@ts-ignore
         this.correctAnswerEl.style.viewTransitionName = "animateMeInner"
 
-        taskQAnswered.append(this.correctAnswerEl);
-        this.taskEl.querySelector('.wrapper-task')?.append(taskQAnswered);
+        this.taskQAnswered.append(this.correctAnswerEl);
+        this.taskEl.querySelector('.wrapper-task')?.append(this.taskQAnswered);
     }  
 
-    async cleanAfterViewTransition (transition:any, correctDiv: HTMLElement) {
+    async cleanAfterViewTransition (transition:any) {
         try {
+
             await transition.finished;
         } finally {
             console.log("transition has completed")
-            correctDiv.removeAttribute('style')
-            correctDiv.querySelector('img, span')?.removeAttribute('style')
+            this.taskQAnswered.removeAttribute('style')
+            this.taskQAnswered.querySelector('img, span')?.removeAttribute('style')
       }
     }
 
