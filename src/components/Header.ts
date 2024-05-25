@@ -1,5 +1,5 @@
 import { fromEvent } from "rxjs";
-import { nextQuestion } from ".";
+import { nextQuestion } from "..";
 
 
 

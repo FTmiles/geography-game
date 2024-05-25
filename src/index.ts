@@ -1,26 +1,22 @@
 
 import { apiGetAllCountries, apiGetCountryDetails } from "./api-service";
 import {  fromEvent, map, tap } from "rxjs";
-import { getRandom1, getRandomMany, pick6RandomCountries, shuffleArray } from "./businessLogic";
-import { render } from "./businessLogic";
-import { renderGameInterface, taskSection } from "./gameInterface"
-import './output.css';
+import { getRandom1, getRandomMany, questionHintStrings, shuffleArray } from "./utilities";
+
+import './static/output.css';
 import { SingleCountryData, FullData } from "./interface";
 import { BehaviorSubject } from "rxjs";
-import Footer from "./Footer";
-import Header from "./Header";
-import { topicSection } from "./gameInterface";
-import { taskHintsDescriptive } from "./businessLogic";
-import { Task } from "./Task";
+import Footer from "./components/Footer";
+import Header from "./components/Header";
+import { topicSection } from "./components/MainQuestionSection";
+import { Task } from "./components/Task";
 
 
-
-const countries = ['germany', 'spain', 'kenya', 'japan', 'canada', 'australia'];
 export let fullData:FullData = {  allCountries: [], allFlags: [], allCapitals: [], allSubregions: [], allPopulations: [], allChinese: []  }
 
 
-let questionHint =  new BehaviorSubject<string>('Given country: ');
-let questionKey = new BehaviorSubject<string>("estone");
+let questionHint =  new BehaviorSubject<string>('');
+let questionKey = new BehaviorSubject<string>('');
 
 
 export const questionCountryIndSubj = new BehaviorSubject<number>(0);
@@ -31,8 +27,8 @@ let tasksDOM: HTMLElement[] = [];
 
 const logState$ = fromEvent(document.querySelector('footer')  || document.body, 'click');
 logState$.subscribe(event=>{
-    console.log("touched your body")
-    questionKey.next("MicroState")
+    console.log("touched your body");
+    console.log("tasksDOM > ", tasksDOM)
 })
 
 export function nextQuestion () {
@@ -54,7 +50,7 @@ questionCountryIndSubj.subscribe(questionCountryInd => {
     // taskNames = Object.keys(fullData) as FullDataKey[];
     taskNames = taskNames.filter(task => task != taskNameKey)
     console.log("taskNames: ", taskNames)
-    questionHint.next("Here's a country >> ")
+    questionHint.next(questionHintStrings[taskNameKey])
     questionKey.next( fullData.allCountries[questionCountryInd]  )
 
 })
@@ -76,7 +72,7 @@ function addTask(){
     root?.append(
         stuff
     );
-    // tasksDOM.push(newTask)
+    tasksDOM.push(stuff)
 }
 
 

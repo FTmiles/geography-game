@@ -1,10 +1,17 @@
 
 import { questionCountryIndSubj, fullData } from ".";
 import { BehaviorSubject } from "rxjs";
+import { FullData } from "./interface";
 
 const root = document.getElementById('root');
 
 
+export const questionHintStrings = {
+    allCountries: "Given info - country: ",
+    allFlags: "Given info - flag: ",
+    allCapitals: "Given info - capital city: ",
+    allChinese: "Given info - Chinese name: "
+}
 
 export function pick6RandomCountries(countries: string[]){
     const maxIndex = countries.length - 1;

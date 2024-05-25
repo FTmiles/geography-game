@@ -3,17 +3,10 @@ import { BehaviorSubject, fromEvent } from "rxjs";
 
 
 
-const root = document.getElementById('root');
-
-export function renderGameInterface() {
-    
-       
-        
-}
 
 export function topicSection(questionHint: BehaviorSubject<string>, questionKey: BehaviorSubject<string>) {
     const topicSection = document.createElement("section");
-    topicSection.className = "flex justify-evenly"
+    topicSection.className = "flex justify-evenly supermanNBA"
 
     const hint:HTMLElement = document.createElement('div');
     hint.className = "bg-orange-300 text-lg ";
