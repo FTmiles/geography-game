@@ -1,6 +1,6 @@
 
 import { apiGetAllCountries, apiGetCountryDetails } from "./api-service";
-import {  fromEvent, map, tap } from "rxjs";
+import {  Subject, fromEvent, map, tap } from "rxjs";
 import { getRandom1, getRandomMany, questionHintStrings, shuffleArray } from "./utilities";
 
 import './static/output.css';
@@ -10,20 +10,34 @@ import Footer from "./components/Footer";
 import Header from "./components/Header";
 import { topicSection } from "./components/MainQuestionSection";
 import { Task } from "./components/Task";
+import { DataKeeper } from "./DataKeeper";
 
-
-export let fullData:FullData = {  allCountries: [], allFlags: [], allCapitals: [], allSubregions: [], allPopulations: [], allChinese: []  }
+// export let fullData:FullData = {  allCountries: [], allFlags: [], allCapitals: [], allSubregions: [], allPopulations: [], allChinese: []  }
 
 
 let questionHint =  new BehaviorSubject<string>('');
 let questionKey = new BehaviorSubject<string>('');
 
+let nextTaskSubj = new Subject();
+let nextMainQSubj = new Subject();
+
+const dataKeeper = new DataKeeper();
+dataKeeper.downloadData();
+
+
+nextTaskSubj.subscribe(() => {
+
+})
+
+nextMainQSubj.subscribe(() => {
+
+})
 
 export const questionCountryIndSubj = new BehaviorSubject<number>(0);
-type FullDataKey = keyof FullData;
-export let taskNames: FullDataKey[];
-let taskNameKey:FullDataKey = 'allCountries';
-let tasksDOM: HTMLElement[] = [];
+// type FullDataKey = keyof FullData;
+// export let taskNames: FullDataKey[];
+// let taskNameKey:FullDataKey = 'allCountries';
+// let tasksDOM: HTMLElement[] = [];
 
 const logState$ = fromEvent(document.querySelector('footer')  || document.body, 'click');
 logState$.subscribe(event=>{
@@ -32,8 +46,7 @@ logState$.subscribe(event=>{
 })
 
 export function nextQuestion () {
-    questionCountryIndSubj.next(getRandom1(fullData.allCountries.length - 1))
-    tasksDOM.forEach(task=> task.remove())
+
     addTask();
 }
 
@@ -77,23 +90,23 @@ function addTask(){
 
 
 
-const countriesSub:any = apiGetAllCountries()
-.subscribe({
-    next: data => {
-        fullData.allCountries = data.map((x:SingleCountryData) => x.country),
-        fullData.allChinese = data.map((x:SingleCountryData) => x.chinese),
-        fullData.allCapitals = data.map((x:SingleCountryData) => x.capital),
-        fullData.allFlags = data.map((x:SingleCountryData) =>  x.flag),
-        fullData.allPopulations = data.map((x:SingleCountryData) => x.population.toString()),
-        fullData.allSubregions = data.map((x:SingleCountryData) => x.subregion),
+// const countriesSub:any = apiGetAllCountries()
+// .subscribe({
+//     next: data => {
+//         fullData.allCountries = data.map((x:SingleCountryData) => x.country),
+//         fullData.allChinese = data.map((x:SingleCountryData) => x.chinese),
+//         fullData.allCapitals = data.map((x:SingleCountryData) => x.capital),
+//         fullData.allFlags = data.map((x:SingleCountryData) =>  x.flag),
+//         fullData.allPopulations = data.map((x:SingleCountryData) => x.population.toString()),
+//         fullData.allSubregions = data.map((x:SingleCountryData) => x.subregion),
 
-        nextQuestion ();
-        // questionCountryIndSubj.next( getRandom1(data.length - 1)  )
+//         nextQuestion ();
+//         // questionCountryIndSubj.next( getRandom1(data.length - 1)  )
 
-    },
-    error: error => console.error('Error fetching data: ', error),
-    complete: () => countriesSub.unsubscribe()
-})
+//     },
+//     error: error => console.error('Error fetching data: ', error),
+//     complete: () => countriesSub.unsubscribe()
+// })
 
 
 const root = document.getElementById('root');
