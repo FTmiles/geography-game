@@ -1,20 +1,44 @@
 import { fromEvent } from "rxjs";
-
+import { getRandom1, shuffleArray } from "../utilities";
+import { nextTaskSubj } from "..";
 
 export class Task {
+    optionsStr: string[];
     options: HTMLElement[];
     taskEl: HTMLElement = document.createElement('section');
     taskDescr: string;
-    correctIndex: number;
+    // correctIndex: number;
     correctAnswerEl: HTMLElement;  //span or img (when flag)
+    correctOptionInd: number;
     taskQAnswered: HTMLElement = document.createElement('div');
+    // optionCount: number;
 
-    constructor (options: string[] , taskDescr: string, isImg: boolean, correctIndex: number) {
-        this.options = this.wrapOptionsInDomEl(options, isImg);
+    constructor (data: string[] , taskDescr: string, isImg: boolean, correctIndex: number, optionCount: number) {
+        const correctStr = data[correctIndex];
+        
         this.taskDescr = taskDescr;
-        this.correctIndex = correctIndex;
-        //reusing wrapOptionsInDomEl, since  it returns  [], i'm destructuring
-        [this.correctAnswerEl] = this.wrapOptionsInDomEl([options[correctIndex]], isImg)
+        // this.correctIndex = correctIndex;
+        //reusing wrapOptionsInDomEl, since  it returns  [], i'm destructuring.. used later when correct answer is clicked on > the correct answer jumps next to task question
+        [this.correctAnswerEl] = this.wrapOptionsInDomEl([correctStr], isImg)
+
+        this.optionsStr = this.randomSelectOptions(data, correctIndex, optionCount);
+        this.correctOptionInd = this.optionsStr.findIndex(option => option === correctStr)
+        this.options = this.wrapOptionsInDomEl(this.optionsStr, isImg);
+
+    }
+
+    randomSelectOptions(data: string[], correctIndex: number, optionCount: number) {
+        const correctStr = data[correctIndex];
+        let options: string[] = [correctStr];
+
+        while (options.length < optionCount) {
+            let random: string = data[getRandom1(data.length-1)]
+            const clash: string | undefined = options.find(option => option === random) 
+            if (clash) continue;
+            options.push(random)
+        }
+
+        return shuffleArray(options);
     }
 
     wrapOptionsInDomEl(options: string[], isImg:boolean):HTMLElement[]{
@@ -64,7 +88,7 @@ export class Task {
 
     handleOptionClick(clickedDiv: HTMLElement, i:number){
         //CORRECT ANSWER
-        if (i === this.correctIndex) {
+        if (i === this.correctOptionInd) {
             // clickedDiv.classList.add("")
             //@ts-ignore
             clickedDiv.style.viewTransitionName = "animateMe"
@@ -95,9 +119,14 @@ export class Task {
         this.taskQAnswered.style.viewTransitionName = "animateMe"
         //@ts-ignore
         this.correctAnswerEl.style.viewTransitionName = "animateMeInner"
-
-        this.taskQAnswered.append(this.correctAnswerEl);
+        
+        let answerEl = this.correctAnswerEl;
+        answerEl.className = "h-8";
+        this.taskQAnswered.append(answerEl);
         this.taskEl.querySelector('.wrapper-task')?.append(this.taskQAnswered);
+        
+        //call next task from index.js
+        nextTaskSubj.next()
     }  
 
     async cleanAfterViewTransition (transition:any) {
@@ -112,5 +141,7 @@ export class Task {
     }
 
     render() {}
-    selfDestruct() {}
+    selfDestruct() {
+        this.taskEl.remove();
+    }
 }

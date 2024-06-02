@@ -1,8 +1,7 @@
-import { FullData } from "./interface";
+import { FullDataKey } from "./interface";
 import { getRandom1, shuffleArray } from "./utilities";
-import { questionCountryIndSubj } from ".";
 
-type FullDataKey = keyof FullData;
+
 
 export class CurrentGame {
     //stats
@@ -12,39 +11,50 @@ export class CurrentGame {
     //game  setting
     answerOptionCount: number = 6;
     taskNames: FullDataKey[] = [];
-    
-    mainQuestion: FullDataKey | undefined = 'allCountries';
-    mainQuestionRandom: boolean = false;
+
     mainQuestionOptions: FullDataKey[] = [];
+    isMainQuestionRandom: boolean = false;
+    mainQuestionChosen: FullDataKey;
 
     gameLength: number = 177; //number of countries
-    gameSequenceCountryIndices: number[] = [];
+    countryIndices: number[] = [];
+    currCountryIndex!: number;
 
     //under current Main Question
     taskNamesShuffled: FullDataKey[] = [];
     tasksDOM: HTMLElement[] = [];
 
 
-    getMainQuestion() {
-        if (this.mainQuestionRandom) 
-            return this.mainQuestionOptions[getRandom1(this.mainQuestionOptions.length)]
-        else 
-            return this.mainQuestion;
+    constructor(answerOptionCount:number, taskNames: FullDataKey[], mainQuestionOptions: FullDataKey[], isMainQuestionRandom: boolean, gameLength: number) {
+        this.answerOptionCount = answerOptionCount;
+        this.taskNames = taskNames;
+        this.gameLength = gameLength;
+
+        this.mainQuestionOptions = mainQuestionOptions;
+        this.isMainQuestionRandom = isMainQuestionRandom;
+        this.mainQuestionChosen = mainQuestionOptions[0];
+    }
+
+    getNextTaskName(): FullDataKey | undefined {
+            return this.taskNamesShuffled.pop();
     }
 
     nextMainQuestion() {
+        this.currCountryIndex = this.getNextGameSequenceCountryIndex();
+
+        if (this.isMainQuestionRandom) 
+            this.mainQuestionChosen = this.mainQuestionOptions[getRandom1(this.mainQuestionOptions.length)]
+
         this.taskNamesShuffled = shuffleArray(this.taskNames)
-        questionCountryIndSubj.next(this.getNextGameSequenceCountryIndex())
         this.tasksDOM.forEach(task=> task.remove())
     }
 
     getNextGameSequenceCountryIndex (): number {
-        const nextCountryIndex: number | undefined = this.gameSequenceCountryIndices.pop();
+        const nextCountryIndex: number | undefined = this.countryIndices.pop();
         if (nextCountryIndex)
             return nextCountryIndex;
 
-        // this.resetGameSequenceCountryIndices();
-        this.gameSequenceCountryIndices  = this.getShuffledArray0ToN(this.gameLength -1);
+        this.countryIndices  = this.getShuffledArray0ToN(this.gameLength -1);
         return this.getNextGameSequenceCountryIndex();        
 
     }
@@ -53,9 +63,7 @@ export class CurrentGame {
         let newArray = [...Array(n).keys()]
         return shuffleArray(newArray);
     }
-    // resetGameSequenceCountryIndices() {
-    //     let newArray = [...Array(this.gameLength -1).keys()]
-    //     this.gameSequenceCountryIndices = shuffleArray(newArray);
-    // }
+
+    
 
 }

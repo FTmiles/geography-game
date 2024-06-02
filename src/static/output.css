@@ -621,8 +621,16 @@ video {
   height: 100%;
 }
 
+.h-8 {
+  height: 2rem;
+}
+
 .max-h-full {
   max-height: 100%;
+}
+
+.max-h-4 {
+  max-height: 1rem;
 }
 
 .min-h-screen {
@@ -773,10 +781,6 @@ video {
 
 .opacity-50 {
   opacity: 0.5;
-}
-
-.filter {
-  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
 }
 
 .transition {

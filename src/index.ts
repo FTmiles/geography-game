@@ -1,7 +1,8 @@
 
 import { apiGetAllCountries, apiGetCountryDetails } from "./api-service";
 import {  Subject, fromEvent, map, tap } from "rxjs";
-import { getRandom1, getRandomMany, questionHintStrings, shuffleArray } from "./utilities";
+import { getRandom1, getRandomMany, shuffleArray } from "./utilities";
+import { mainQuestionHintStrings, taskHintsDescriptive, defGameSettings } from "./configs";
 
 import './static/output.css';
 import { SingleCountryData, FullData } from "./interface";
@@ -11,102 +12,83 @@ import Header from "./components/Header";
 import { topicSection } from "./components/MainQuestionSection";
 import { Task } from "./components/Task";
 import { DataKeeper } from "./DataKeeper";
-
+import { CurrentGame } from "./CurrentGame";
 // export let fullData:FullData = {  allCountries: [], allFlags: [], allCapitals: [], allSubregions: [], allPopulations: [], allChinese: []  }
 
 
-let questionHint =  new BehaviorSubject<string>('');
-let questionKey = new BehaviorSubject<string>('');
+let mainQuestionHint =  new BehaviorSubject<string>('');
+let mainQuestionKey = new BehaviorSubject<string>('');
 
-let nextTaskSubj = new Subject();
-let nextMainQSubj = new Subject();
+export let nextTaskSubj = new Subject<void>();
+export let nextMainQSubj = new Subject<void>();
 
-const dataKeeper = new DataKeeper();
+let currentGame: CurrentGame;
+
+const tasksArr: Task[] = [];
+
+nextTaskSubj.subscribe(() => {
+    const newTaskName: FullDataKey | undefined = currentGame.getNextTaskName();
+    if (!newTaskName) {
+        setTimeout(()=>nextMainQSubj.next(), 1000)
+        return;
+    }
+
+    let task:Task = new Task(
+        dataKeeper.fullData[newTaskName],
+        taskHintsDescriptive[newTaskName],
+        newTaskName === 'allFlags',
+        currentGame.currCountryIndex, 
+        currentGame.answerOptionCount,
+    )
+    tasksArr.push(task);
+
+    const stuff = task.setup();
+    root?.append( stuff );
+    // tasksDOM.push(stuff)
+})
+
+    const removeOldTasks = () => {
+        tasksArr.forEach(task => task.selfDestruct())
+        tasksArr.length = 0;
+    }
+
+nextMainQSubj.subscribe(() => {
+    removeOldTasks();
+
+    currentGame.nextMainQuestion();
+
+    //renders main-Question on screen
+    mainQuestionHint.next(mainQuestionHintStrings[currentGame.mainQuestionChosen])
+    mainQuestionKey.next( dataKeeper.fullData[currentGame.mainQuestionChosen][currentGame.currCountryIndex] )
+    
+    //renders the first task
+    nextTaskSubj.next();
+})
+
+type FullDataKey = keyof FullData;
+
+//callback after data has been downloaded
+const initCurrentGame = () :void => {
+    currentGame = new CurrentGame(defGameSettings.answerOptionCount, defGameSettings.taskNames, defGameSettings.mainQuestionOptions, defGameSettings.isMainQuestionRandom, defGameSettings.gameLength )
+    nextMainQSubj.next();
+
+}
+
+//init DataKeeper object, download data, then run this callback
+const dataKeeper = new DataKeeper(initCurrentGame);
 dataKeeper.downloadData();
 
 
-nextTaskSubj.subscribe(() => {
 
-})
-
-nextMainQSubj.subscribe(() => {
-
-})
-
-export const questionCountryIndSubj = new BehaviorSubject<number>(0);
-// type FullDataKey = keyof FullData;
-// export let taskNames: FullDataKey[];
-// let taskNameKey:FullDataKey = 'allCountries';
-// let tasksDOM: HTMLElement[] = [];
 
 const logState$ = fromEvent(document.querySelector('footer')  || document.body, 'click');
 logState$.subscribe(event=>{
     console.log("touched your body");
-    console.log("tasksDOM > ", tasksDOM)
+    // console.log("tasksDOM > ", tasksDOM)
 })
 
-export function nextQuestion () {
-
-    addTask();
-}
-
-//NEXT QUESTION IMPLEMENTATION
-questionCountryIndSubj.subscribe(questionCountryInd => {
-    //new value issued equals to game restart / change country
-    if (questionCountryInd == null) {
-        console.log("questionCountryInd === null, so I'm quitting early guard clause");
-        return;
-    }
-    
-    //set / reset game questions
-    taskNames = shuffleArray(Object.keys(fullData) as FullDataKey[] );
-    // taskNames = Object.keys(fullData) as FullDataKey[];
-    taskNames = taskNames.filter(task => task != taskNameKey)
-    console.log("taskNames: ", taskNames)
-    questionHint.next(questionHintStrings[taskNameKey])
-    questionKey.next( fullData.allCountries[questionCountryInd]  )
-
-})
-
-function addTask(){
-    let random5: number[] = getRandomMany(fullData.allCountries.length - 1, 5, questionCountryIndSubj.getValue());
-    random5.push(questionCountryIndSubj.getValue())
-    random5 = shuffleArray(random5);
-    console.log("RANDOM 5: ", random5);
-    
-    const taskName: FullDataKey | undefined = taskNames.shift();
-    if (typeof taskName === "undefined") return;
-
-    const options: string[] = random5.map((n:number) => fullData[taskName][n]) //as (string[] | number[] | HTMLElement[]); //without as..., gives  (string | number | HTMLElement)[]
-    // const newTask = taskSection(taskHintsDescriptive[taskName], options);
-    const newTask: Task = new Task(options, "gimme the shitty!", taskName === 'allFlags', random5.findIndex(x=> x === questionCountryIndSubj.getValue()))
-    const stuff = newTask.setup();
-    console.log("fractionalization", stuff)
-    root?.append(
-        stuff
-    );
-    tasksDOM.push(stuff)
-}
 
 
-
-// const countriesSub:any = apiGetAllCountries()
-// .subscribe({
-//     next: data => {
-//         fullData.allCountries = data.map((x:SingleCountryData) => x.country),
-//         fullData.allChinese = data.map((x:SingleCountryData) => x.chinese),
-//         fullData.allCapitals = data.map((x:SingleCountryData) => x.capital),
-//         fullData.allFlags = data.map((x:SingleCountryData) =>  x.flag),
-//         fullData.allPopulations = data.map((x:SingleCountryData) => x.population.toString()),
-//         fullData.allSubregions = data.map((x:SingleCountryData) => x.subregion),
-
-//         nextQuestion ();
-//         // questionCountryIndSubj.next( getRandom1(data.length - 1)  )
-
-//     },
-//     error: error => console.error('Error fetching data: ', error),
-//     complete: () => countriesSub.unsubscribe()
-// })
 
 
 const root = document.getElementById('root');
@@ -123,7 +105,7 @@ export function renderPage(){
     root.className = "grow  bg-gray-500 mx-auto w-full" //max-w-screen-md
 
     root.append(
-        topicSection(questionHint, questionKey)
+        topicSection(mainQuestionHint, mainQuestionKey)
         // questionSection()
     )
 }

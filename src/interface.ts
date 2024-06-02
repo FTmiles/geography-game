@@ -15,3 +15,13 @@ export interface FullData {
     allPopulations: string[];
     allChinese: string[];
 }
+
+export type FullDataKey = keyof FullData;
+
+export interface DefGameSettings {
+    answerOptionCount: number,
+    taskNames:  FullDataKey[],
+    mainQuestionOptions: FullDataKey[],
+    isMainQuestionRandom: boolean,
+    gameLength: number,
+}

@@ -1,18 +1,4 @@
 
-import { questionCountryIndSubj, fullData } from ".";
-import { BehaviorSubject } from "rxjs";
-import { FullData } from "./interface";
-
-const root = document.getElementById('root');
-
-
-export const questionHintStrings = {
-    allCountries: "Given info - country: ",
-    allFlags: "Given info - flag: ",
-    allCapitals: "Given info - capital city: ",
-    allChinese: "Given info - Chinese name: "
-}
-
 export function pick6RandomCountries(countries: string[]){
     const maxIndex = countries.length - 1;
     let countries6:string[] = [];
@@ -61,20 +47,18 @@ export function getRandomMany (max: number, howMany: number, exclude: number)  {
     return arr;
 }
 
-export function shuffleArray<T>(array: T[]): T[] {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-  }
   
+  export function shuffleArray<T>(array: T[]): T[] {
+    // Create a copy of the original array
+    const newArray = array.slice();
+    
+    // Shuffle the copy
+    for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
 
-  export const taskHintsDescriptive:  { [key: string]: string } = {
-    allCountries: "Name the country",
-    allFlagsEl: "Pick the flag",
-    allCapitals: "What is the capital city?",
-    allSubregions: "Where is the country located?",
-    allPopulations: "Guess the population",
-    allChinese: "In Chinese"
-  }
+    // Return the shuffled copy
+    return newArray;
+}  
+

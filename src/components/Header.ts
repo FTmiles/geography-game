@@ -1,5 +1,5 @@
 import { fromEvent } from "rxjs";
-import { nextQuestion } from "..";
+// import { nextQuestion } from "..";
 
 
 
@@ -18,7 +18,7 @@ export default function Header(){
     resetButton.innerText = "reset question"
     resetButton.className = "rounded-md border-b-purple-300 border-2 "
     const buttonObs = fromEvent(resetButton, 'click');
-    buttonObs.subscribe(event => nextQuestion())
+    // buttonObs.subscribe(event => nextQuestion())
 
     headerDom.append(
         h1,
