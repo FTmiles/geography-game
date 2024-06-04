@@ -1,12 +1,12 @@
-import { FullDataKey } from "./interface";
+import { FullDataKey, GameStats } from "./interface";
 import { getRandom1, shuffleArray } from "./utilities";
-
+import { BehaviorSubject } from "rxjs";
 
 
 export class CurrentGame {
     //stats
-    missedCount: number = 0;
-    correctCount: number = 0;
+    statsMisses: BehaviorSubject<number> = new BehaviorSubject(0);
+    statsHits: BehaviorSubject<number> = new BehaviorSubject(0);
     
     //game  setting
     answerOptionCount: number = 6;
@@ -14,7 +14,7 @@ export class CurrentGame {
 
     mainQuestionOptions: FullDataKey[] = [];
     isMainQuestionRandom: boolean = false;
-    mainQuestionChosen: FullDataKey;
+    mainQuestionChosen!: FullDataKey;
 
     gameLength: number = 177; //number of countries
     countryIndices: number[] = [];
@@ -25,7 +25,7 @@ export class CurrentGame {
     tasksDOM: HTMLElement[] = [];
 
 
-    constructor(answerOptionCount:number, taskNames: FullDataKey[], mainQuestionOptions: FullDataKey[], isMainQuestionRandom: boolean, gameLength: number) {
+    restartGame (answerOptionCount:number, taskNames: FullDataKey[], mainQuestionOptions: FullDataKey[], isMainQuestionRandom: boolean, gameLength: number) {
         this.answerOptionCount = answerOptionCount;
         this.taskNames = taskNames;
         this.gameLength = gameLength;
@@ -33,6 +33,9 @@ export class CurrentGame {
         this.mainQuestionOptions = mainQuestionOptions;
         this.isMainQuestionRandom = isMainQuestionRandom;
         this.mainQuestionChosen = mainQuestionOptions[0];
+
+        this.statsMisses.next(0);
+        this.statsHits.next(0);
     }
 
     getNextTaskName(): FullDataKey | undefined {
@@ -63,7 +66,5 @@ export class CurrentGame {
         let newArray = [...Array(n).keys()]
         return shuffleArray(newArray);
     }
-
-    
 
 }

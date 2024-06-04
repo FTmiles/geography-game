@@ -1,6 +1,7 @@
-import { fromEvent } from "rxjs";
+import { BehaviorSubject, fromEvent } from "rxjs";
 import { getRandom1, shuffleArray } from "../utilities";
 import { nextTaskSubj } from "..";
+import { GameStats } from "../interface";
 
 export class Task {
     optionsStr: string[];
@@ -12,8 +13,11 @@ export class Task {
     correctOptionInd: number;
     taskQAnswered: HTMLElement = document.createElement('div');
     // optionCount: number;
+    statsHits: BehaviorSubject<number>;
+    statsMisses: BehaviorSubject<number>;
+    alreadyMissed: boolean = false;
 
-    constructor (data: string[] , taskDescr: string, isImg: boolean, correctIndex: number, optionCount: number) {
+    constructor (data: string[] , taskDescr: string, isImg: boolean, correctIndex: number, optionCount: number, statsHits: BehaviorSubject<number>, statsMisses: BehaviorSubject<number>) {
         const correctStr = data[correctIndex];
         
         this.taskDescr = taskDescr;
@@ -24,7 +28,9 @@ export class Task {
         this.optionsStr = this.randomSelectOptions(data, correctIndex, optionCount);
         this.correctOptionInd = this.optionsStr.findIndex(option => option === correctStr)
         this.options = this.wrapOptionsInDomEl(this.optionsStr, isImg);
-
+        
+        this.statsHits = statsHits;
+        this.statsMisses = statsMisses;
     }
 
     randomSelectOptions(data: string[], correctIndex: number, optionCount: number) {
@@ -89,6 +95,7 @@ export class Task {
     handleOptionClick(clickedDiv: HTMLElement, i:number){
         //CORRECT ANSWER
         if (i === this.correctOptionInd) {
+            this.statsIncrementHits();
             // clickedDiv.classList.add("")
             //@ts-ignore
             clickedDiv.style.viewTransitionName = "animateMe"
@@ -104,6 +111,7 @@ export class Task {
             this.handleClickedCorrect(clickedDiv)
         } else { //INCORRECT ANSWER
             clickedDiv.classList.add("opacity-50");
+            this.statsIncrementMisses();
         }
     }
 
@@ -143,5 +151,16 @@ export class Task {
     render() {}
     selfDestruct() {
         this.taskEl.remove();
+    }
+
+    statsIncrementMisses() {
+        if (!this.alreadyMissed) {
+            this.statsMisses.next( this.statsMisses.getValue() + 1 )
+            this.alreadyMissed = true;
+        }
+    }
+
+    statsIncrementHits() {
+        this.statsHits.next( this.statsHits.getValue() + 1 )
     }
 }

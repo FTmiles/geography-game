@@ -25,3 +25,9 @@ export interface DefGameSettings {
     isMainQuestionRandom: boolean,
     gameLength: number,
 }
+
+
+export interface GameStats {
+    hits: number,
+    misses: number
+}

@@ -1,12 +1,15 @@
 import { BehaviorSubject, fromEvent } from "rxjs";
 import { StatsWidget } from "./StatsWidget";
+import { GameSettings } from "./GameSettings";
 // import { nextQuestion } from "..";
 
 export class Header {
-  gameStats;
+  statsHits: BehaviorSubject<number>;
+  statsMisses: BehaviorSubject<number>
 
-  constructor(gameStats: any) {
-    this.gameStats = gameStats;
+  constructor(statsHits: BehaviorSubject<number>, statsMisses: BehaviorSubject<number>) {
+    this.statsHits = statsHits;
+    this.statsMisses = statsMisses;
   }
 
   setup() {
@@ -25,8 +28,14 @@ export class Header {
     const buttonObs = fromEvent(resetButton, "click");
     // buttonObs.subscribe(event => nextQuestion())
 
-    const statsWidget = new StatsWidget(this.gameStats);
-   headerDom.append(h1, statsWidget.render());
+    const statsWidget = new StatsWidget(this.statsHits, this.statsMisses);
+    const gameSettings = new GameSettings();
+    headerDom.append(
+      h1, 
+      statsWidget.render(),
+      gameSettings.renderIcon(),
+      gameSettings.renderSettingsPanel()
+    );
   }
 
  

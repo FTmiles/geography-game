@@ -3,11 +3,13 @@ import { CurrentGame } from "../../CurrentGame";
 import { GameStats } from "../../interface";
 
 export class StatsWidget {
-    gameStats: BehaviorSubject<GameStats>
+    statsHits: BehaviorSubject<number>;
+    statsMisses: BehaviorSubject<number>;
 
     
-    constructor(gameStats: BehaviorSubject<GameStats>) {
-        this.gameStats = gameStats;
+    constructor(statsHits: BehaviorSubject<number>, statsMisses: BehaviorSubject<number>) {
+        this.statsHits = statsHits;
+        this.statsMisses = statsMisses;
     }
 
     render() {
@@ -18,16 +20,12 @@ export class StatsWidget {
     
         const liHit = document.createElement("li");
         liHit.className = "text-green-300";
-    
+        this.statsHits.subscribe((hits:number) => liHit.innerText = `Hit: ${hits}` )
+
         const liMiss = document.createElement("li");
         liMiss.className = "text-red-300";
+        this.statsMisses.subscribe((misses:number) => liMiss.innerText = `Missed: ${misses}` )
 
-        this.gameStats.subscribe(statsObj => {
-            liHit.innerText = `Hits: ${statsObj.hits}`;
-            liMiss.innerText = `Misses: ${statsObj.misses}`;
-        })
-
-    
         ul.append(liHit, liMiss);
         container.append(ul);
         return container;
