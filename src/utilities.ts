@@ -62,3 +62,7 @@ export function getRandomMany (max: number, howMany: number, exclude: number)  {
     return newArray;
 }  
 
+export const stringIsNumber = (string: string) => {
+    const regex = /^-?\d+(\.\d+)?$/;
+    return regex.test(string);
+}
