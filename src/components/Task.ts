@@ -1,5 +1,5 @@
 import { BehaviorSubject, fromEvent } from "rxjs";
-import { getRandom1, shuffleArray } from "../utilities";
+import { getRandom1, shuffleArray, stringIsNumber } from "../utilities";
 import { nextTaskSubj } from "..";
 import { GameStats } from "../interface";
 
@@ -54,6 +54,7 @@ export class Task {
                 el = document.createElement('img');
                 (el as HTMLImageElement).src = option;
             } else {
+                if (stringIsNumber(option)) option = parseFloat(option).toLocaleString();
                 el = document.createElement('span');
                 el.innerText = option;
             }
